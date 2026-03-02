@@ -163,8 +163,6 @@ async def ping(interaction: discord.Interaction):
     latency = round(bot.latency * 1000)
     await interaction.response.send_message(f"🏓 {latency}ms")
 
-bot.run(TOKEN)
-
 from flask import Flask
 import threading
 import os
@@ -180,3 +178,7 @@ def run_web():
     app.run(host="0.0.0.0", port=port)
 
 threading.Thread(target=run_web).start()
+
+
+bot.run(TOKEN)
+
