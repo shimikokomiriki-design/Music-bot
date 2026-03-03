@@ -126,12 +126,17 @@ async def play(interaction: discord.Interaction, query: str):
 
     # 🔥 ปรับ yt-dlp ให้เสถียรกว่า
     ydl_opts = {
-        "format": "bestaudio/best",
-        "quiet": True,
-        "noplaylist": True,
-        "default_search": "ytsearch",
-        "source_address": "0.0.0.0"
+    "format": "bestaudio/best",
+    "quiet": True,
+    "noplaylist": True,
+    "default_search": "ytsearch",
+    "source_address": "0.0.0.0",
+    "extractor_args": {
+        "youtube": {
+            "player_client": ["android"]
+        }
     }
+}
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
