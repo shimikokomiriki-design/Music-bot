@@ -122,21 +122,32 @@ async def play(interaction: discord.Interaction, query: str):
     vc = interaction.guild.voice_client
 
     if not vc:
-        vc = await voice_channel.connect()
+        vc = await voice_channel.connect(reconnect=True)
 
+    # 🔥 ปรับ yt-dlp ให้เสถียรกว่า
     ydl_opts = {
         "format": "bestaudio/best",
         "quiet": True,
-        "default_search": "auto"
+        "noplaylist": True,
+        "default_search": "ytsearch",
+        "source_address": "0.0.0.0"
     }
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(query, download=False)
-        if "entries" in info:
-            info = info["entries"][0]
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            # 🔥 บังคับใช้ ytsearch ลดโอกาสโดนบล็อก
+            info = ydl.extract_info(f"ytsearch:{query}", download=False)
 
-    audio_url = info["url"]
-    title = info.get("title")
+            if "entries" in info and info["entries"]:
+                info = info["entries"][0]
+            else:
+                return await interaction.followup.send("❌ No results found.")
+
+    except Exception as e:
+        return await interaction.followup.send(f"❌ Error: {str(e)}")
+
+    audio_url = info.get("url")
+    title = info.get("title", "Unknown Title")
     webpage_url = info.get("webpage_url")
     thumbnail = info.get("thumbnail")
     duration = info.get("duration")
@@ -148,12 +159,13 @@ async def play(interaction: discord.Interaction, query: str):
 
     embed = discord.Embed(
         title="🎶 Added to Queue",
-        description=f"[{title}]({webpage_url})",
+        description=f"[{title}]({webpage_url})" if webpage_url else title,
         color=0xff69b4
     )
 
     embed.add_field(name="⏱ Duration", value=format_duration(duration))
     embed.add_field(name="👤 Requested by", value=interaction.user.mention)
+
     if thumbnail:
         embed.set_thumbnail(url=thumbnail)
 
