@@ -3,8 +3,7 @@ FROM python:3.11-slim
 WORKDIR /app
 
 RUN apt-get update && \
-    apt-get install -y ffmpeg nodejs npm curl && \
-    npm install -g yt-dlp
+    apt-get install -y ffmpeg nodejs
 
 COPY . .
 
